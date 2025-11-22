@@ -28,8 +28,8 @@ from django.http import HttpResponseRedirect
 from authentication.views import csrf, auth_status
 
 def to_spa_app(_request):
-    # In dev, send users to the React app
-    return HttpResponseRedirect("http://localhost:5173/app")
+    # In dev, send users to the Next.js app
+    return HttpResponseRedirect("http://localhost:3000/")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -38,6 +38,10 @@ urlpatterns = [
     # JSON auth helpers (must come BEFORE any catch-all)
     path("api/auth/csrf/", csrf, name="csrf"),
     path("api/auth/status/", auth_status, name="auth-status"),
+
+    # API endpoints
+    path("api/mail/", include("mail.urls")),
+    path("api/analytics/", include("analytics.urls")),
 
     # Optional: if you also want /app on Django to bounce to the SPA
     path("app", to_spa_app, name="app-redirect"),

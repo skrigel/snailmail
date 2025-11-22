@@ -5,7 +5,7 @@ services:
       POSTGRES_DB: snailmail
       POSTGRES_USER: snailmail
       POSTGRES_PASSWORD: snailmail
-    ports: ["5432:5432"]
+    ports: ["5433:5432"]
     volumes: ["pg:/var/lib/postgresql/data"]
 
   redis:

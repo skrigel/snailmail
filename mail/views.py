@@ -1,11 +1,13 @@
 from django.shortcuts import render
-
-# Create your views here.
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .tasks import sync_gmail_metadata
 
 
 @login_required
@@ -17,6 +19,24 @@ def snail_summary(request):
         "by_category": {"work": 20, "personal": 15, "promotions": 7},
     }
     return JsonResponse(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def trigger_gmail_sync(request):
+    """
+    API endpoint to trigger Gmail sync for the authenticated user.
+    """
+    days = request.data.get('days', 7)
+
+    # Queue the Celery task
+    task = sync_gmail_metadata.delay(request.user.id, days=days)
+
+    return Response({
+        "success": True,
+        "message": f"Gmail sync queued for {days} days of history",
+        "task_id": task.id
+    })
 
 
 # class MailUploadView(LoginRequiredMixin, FormView):

@@ -12,9 +12,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, 'snailmail', '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -44,6 +49,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "corsheaders",
+    "rest_framework",
 
     # your apps
     "mail","authentication", "analytics"
@@ -77,12 +83,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'snailmail.urls'
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",   # your React dev server
+    "http://localhost:3000",   # Next.js dev server
 ]
 CORS_ALLOW_CREDENTIALS = True   # allow cookies to be sent
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
+    "http://localhost:3000",
 ]
 SECURE_SSL_REDIRECT = False        # ensure off in dev
 
@@ -164,6 +170,17 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", default=CELERY_BROKER
 # --- Security (tighten for prod) ---
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# --- Django REST Framework ---
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

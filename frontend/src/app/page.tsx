@@ -10,18 +10,44 @@ import type { DailyAnalytics } from '@/components/lib/types';
 import Snail from '@/components/snail';
 import AnalyticsDialog from '@/components/analytics-dialog';
 import SnailMailIcon from '@/components/icons/snail-mail-icon';
-import { CalendarDays, Mail, Reply, Clock } from 'lucide-react';
+import { CalendarDays, Mail, Reply, Clock, LogIn, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+
 export default function Home() {
   const [selectedSnail, setSelectedSnail] = useState<DailyAnalytics | null>(null);
+  const { isAuthenticated, user, loading, login, logout } = useAuth();
 
   return (
     <div className={"flex flex-col min-h-screen bg-background"}>
-      {/* <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"> */}
-        <div className={"container flex h-2 items-center space-x-4"}>
-          <SnailMailIcon className={"h-2 w-2"} />
-          <h1 className=  {"text-2xl font-bold font-headline tracking-tighter"}>Snail Mail Analytics</h1>
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4">
+        <div className={"container flex items-center justify-between"}>
+          <div className="flex items-center space-x-4">
+            <SnailMailIcon className={"h-8 w-8"} />
+            <h1 className={"text-2xl font-bold font-headline tracking-tighter"}>Snail Mail Analytics</h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {loading ? (
+              <span className="text-sm text-muted-foreground">Loading...</span>
+            ) : isAuthenticated && user ? (
+              <>
+                <span className="text-sm">
+                  Welcome, <strong>{user.username}</strong>
+                </span>
+                <Button variant="outline" size="sm" onClick={logout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button onClick={login}>
+                <LogIn className="w-4 h-4 mr-2" />
+                Login with Google
+              </Button>
+            )}
+          </div>
         </div>
-      {/* </header> */}
+      </header>
       
       <main className={"flex-1 container mx-auto p-4 md:p-8 space-y-12"}>
         <section>
