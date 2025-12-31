@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, BarChart, Bar } from '@/components/ui/chart';
-import { XAxis, YAxis } from 'recharts';
-import type { DailyAnalytics } from './lib/types';
+import { XAxis, YAxis, CartesianGrid } from 'recharts';
+import type { DailyAnalytics } from '@/lib/types';
 import { Mail, Reply, Clock } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
 
@@ -93,7 +93,5 @@ const AnalyticsDialog = ({ analytics, open, onOpenChange }: AnalyticsDialogProps
     </Dialog>
   );
 };
-// Add CartesianGrid to imports since it is used in the chart
-import { CartesianGrid } from 'recharts';
 
 export default AnalyticsDialog;
