@@ -5,8 +5,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { dailyData, historicalData } from '@/components/lib/mock-data';
-import type { DailyAnalytics } from '@/components/lib/types';
+import type { DailyAnalytics } from '@/lib/types';
 import Snail from '@/components/snail';
 import AnalyticsDialog from '@/components/analytics-dialog';
 import SnailMailIcon from '@/components/icons/snail-mail-icon';
@@ -14,6 +13,86 @@ import { CalendarDays, Mail, Reply, Clock, LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
+  const dailyData: DailyAnalytics[] = [
+    {
+      id: 1,
+      dayOfWeek: 'Monday',
+      date: '2024-10-20',
+      inbox_count: 20,
+      sent_count: 5,
+      work: 10,
+      personal: 8,
+      promotions: 2,
+      emailsReceived: 20,
+      emailsReplied: 5,
+      responseTime: 120,
+      progress: 25,
+      hourlyActivity: []
+    },
+    {
+      id: 2,
+      dayOfWeek: 'Tuesday',
+      date: '2024-10-21',
+      inbox_count: 15,
+      sent_count: 7,
+      work: 8,
+      personal: 5,
+      promotions: 2,
+      emailsReceived: 15,
+      emailsReplied: 7,
+      responseTime: 90,
+      progress: 40,
+      hourlyActivity: []
+    }
+  ];
+
+  const historicalData: DailyAnalytics[] = [
+    {
+      id: 3,
+      dayOfWeek: 'Wednesday',
+      date: '2024-10-22',
+      inbox_count: 30,
+      sent_count: 10,
+      work: 15,
+      personal: 12,
+      promotions: 3,
+      emailsReceived: 30,
+      emailsReplied: 10,
+      responseTime: 80,
+      progress: 60,
+      hourlyActivity: []
+    },
+    {
+      id: 4,
+      dayOfWeek: 'Thursday',
+      date: '2024-10-23',
+      inbox_count: 25,
+      sent_count: 12,
+      work: 12,
+      personal: 10,
+      promotions: 3,
+      emailsReceived: 25,
+      emailsReplied: 12,
+      responseTime: 70,
+      progress: 75,
+      hourlyActivity: []
+    },
+    {
+      id: 5,
+      dayOfWeek: 'Friday',
+      date: '2024-10-24',
+      inbox_count: 40,
+      sent_count: 20,
+      work: 20,
+      personal: 15,
+      promotions: 5,
+      emailsReceived: 40,
+      emailsReplied: 20,
+      responseTime: 60,
+      progress: 90,
+      hourlyActivity: []
+    },
+  ];
   const [selectedSnail, setSelectedSnail] = useState<DailyAnalytics | null>(null);
   const { isAuthenticated, user, loading, login, logout } = useAuth();
 
