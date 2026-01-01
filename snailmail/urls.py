@@ -15,17 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from authentication.views import csrf, auth_status
-
-from django.contrib import admin
 from django.urls import path, re_path, include
 from django.http import HttpResponseRedirect
-from authentication.views import csrf, auth_status
+from authentication.views import (
+    csrf,
+    auth_status,
+    google_login_redirect,
+    google_callback,
+    logout_view
+)
 
 def to_spa_app(_request):
     # In dev, send users to the Next.js app
@@ -38,6 +36,9 @@ urlpatterns = [
     # JSON auth helpers (must come BEFORE any catch-all)
     path("api/auth/csrf/", csrf, name="csrf"),
     path("api/auth/status/", auth_status, name="auth-status"),
+    path("api/auth/google/login/", google_login_redirect, name="google-login"),
+    path("api/auth/google/callback/", google_callback, name="google-callback"),
+    path("api/auth/logout/", logout_view, name="logout"),
 
     # API endpoints
     path("api/mail/", include("mail.urls")),
