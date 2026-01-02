@@ -96,7 +96,26 @@ Frontend will be available at `http://localhost:3000`
 
 ### 5. Configure Google OAuth
 
-See the [Setup & Testing Guide](SETUP_AND_TESTING_GUIDE.md) for detailed OAuth configuration.
+1. **Access Django Admin**
+   - Navigate to `http://localhost:8000/admin/`
+   - Log in with your superuser credentials
+
+2. **Add Google Social Application**
+   - Click on **Social applications** under **Social accounts**
+   - Click **Add social application**
+   - Fill in the following:
+     - **Provider**: Select `Google`
+     - **Name**: `Google` (or any name you prefer)
+     - **Client id**: Your Google OAuth Client ID from `.env`
+     - **Secret key**: Your Google OAuth Client Secret from `.env`
+     - **Sites**: Select `example.com` and move it to "Chosen sites"
+   - Click **Save**
+
+3. **Verify Configuration**
+   - Visit `http://localhost:8000/api/auth/google/login/`
+   - You should be redirected to Google's OAuth consent screen
+
+Your Google OAuth is now configured and ready to use!
 
 ## Project Structure
 
