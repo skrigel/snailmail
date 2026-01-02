@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import type { SVGProps } from "react";
 
 const SnailMailIcon = (props: SVGProps<SVGSVGElement>) => (
