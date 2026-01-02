@@ -1,3 +1,4 @@
+from .models import Message
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView
@@ -38,9 +39,22 @@ def trigger_gmail_sync(request):
         "task_id": task.id
     })
 
+@login_required
+@api_view(['GET'])
+def fetch_mail_for_date(request):
 
-# class MailUploadView(LoginRequiredMixin, FormView):
-#     template_name = "mail/upload.html"
+    owner = request.user
+    date_str = request.get("date")
+
+    messages = Message.objects.filter(owner=owner, internal_date=date_str)
+
+    return Response({
+        "date": date_str,
+        'messages': messages.values()})
+
+
+
+# class MailListView(LoginRequiredMixin, ListView):
 #     form_class = MailUploadForm
 #     success_url = reverse_lazy("mail:list")
 
