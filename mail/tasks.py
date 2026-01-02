@@ -8,10 +8,53 @@ from allauth.socialaccount.models import SocialToken, SocialApp
 from datetime import datetime, timedelta
 import logging
 
-from .models import Message, GmailSyncState
+from .models import Message, GmailSyncState, GmailMessage
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+def parse_message_headers(headers_list):
+    """Parse Gmail headers list into a dict."""
+    return {h['name']: h['value'] for h in headers_list}
+
+
+def extract_email_from_header(header_value):
+    """Extract email from 'Name <email@example.com>' format."""
+    if not header_value:
+        return ''
+    # Simple extraction - could be improved with email.utils.parseaddr
+    if '<' in header_value and '>' in header_value:
+        return header_value.split('<')[1].split('>')[0]
+    return header_value
+
+
+def determine_direction(label_ids):
+    """Determine if message is inbox or sent."""
+    return 'sent' if 'SENT' in label_ids else 'inbox'
+
+
+def has_attachments(payload):
+    """Check if message has attachments."""
+    if not payload:
+        return False
+
+    # Check parts for attachments
+    parts = payload.get('parts', [])
+    for part in parts:
+        if part.get('filename'):
+            return True
+        # Check nested parts
+        if part.get('parts'):
+            for nested_part in part['parts']:
+                if nested_part.get('filename'):
+                    return True
+    return False
+
+
+def is_message_read(label_ids):
+    """Check if message is read (doesn't have UNREAD label)."""
+    return 'UNREAD' not in label_ids
 
 
 @shared_task
