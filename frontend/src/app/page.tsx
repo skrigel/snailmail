@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -9,92 +8,45 @@ import type { DailyAnalytics } from '@/lib/types';
 import Snail from '@/components/snail';
 import AnalyticsDialog from '@/components/analytics-dialog';
 import SnailMailIcon from '@/components/icons/snail-mail-icon';
-import { CalendarDays, Mail, Reply, Clock, LogIn, LogOut } from 'lucide-react';
+import { CalendarDays, Mail, Reply, Clock, LogIn, LogOut, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-
+import { useGetStats } from '@/hooks/useGetStats';
+import { useMailSync } from '@/hooks/useMailSync';
+import { convertStatToAnalytics, getMockAnalytics } from '@/lib/utils/analytics';
+  
 export default function Home() {
-  const dailyData: DailyAnalytics[] = [
-    {
-      id: 1,
-      dayOfWeek: 'Monday',
-      date: '2024-10-20',
-      inbox_count: 20,
-      sent_count: 5,
-      work: 10,
-      personal: 8,
-      promotions: 2,
-      emailsReceived: 20,
-      emailsReplied: 5,
-      responseTime: 120,
-      progress: 25,
-      hourlyActivity: []
-    },
-    {
-      id: 2,
-      dayOfWeek: 'Tuesday',
-      date: '2024-10-21',
-      inbox_count: 15,
-      sent_count: 7,
-      work: 8,
-      personal: 5,
-      promotions: 2,
-      emailsReceived: 15,
-      emailsReplied: 7,
-      responseTime: 90,
-      progress: 40,
-      hourlyActivity: []
-    }
-  ];
-
-  const historicalData: DailyAnalytics[] = [
-    {
-      id: 3,
-      dayOfWeek: 'Wednesday',
-      date: '2024-10-22',
-      inbox_count: 30,
-      sent_count: 10,
-      work: 15,
-      personal: 12,
-      promotions: 3,
-      emailsReceived: 30,
-      emailsReplied: 10,
-      responseTime: 80,
-      progress: 60,
-      hourlyActivity: []
-    },
-    {
-      id: 4,
-      dayOfWeek: 'Thursday',
-      date: '2024-10-23',
-      inbox_count: 25,
-      sent_count: 12,
-      work: 12,
-      personal: 10,
-      promotions: 3,
-      emailsReceived: 25,
-      emailsReplied: 12,
-      responseTime: 70,
-      progress: 75,
-      hourlyActivity: []
-    },
-    {
-      id: 5,
-      dayOfWeek: 'Friday',
-      date: '2024-10-24',
-      inbox_count: 40,
-      sent_count: 20,
-      work: 20,
-      personal: 15,
-      promotions: 5,
-      emailsReceived: 40,
-      emailsReplied: 20,
-      responseTime: 60,
-      progress: 90,
-      hourlyActivity: []
-    },
-  ];
-  const [selectedSnail, setSelectedSnail] = useState<DailyAnalytics | null>(null);
   const { isAuthenticated, user, loading, login, logout } = useAuth();
+  const { stats, loading: statsLoading, refetch } = useGetStats();
+  const { status: syncStatus, error: syncError, triggerSync } = useMailSync();
+
+  const [selectedSnail, setSelectedSnail] = useState<DailyAnalytics | null>(null);
+
+  // Use real data if authenticated and available, otherwise use mock data
+  const allData = useMemo(() => {
+    if (isAuthenticated && stats.length > 0) {
+      return stats.map((stat, index) => convertStatToAnalytics(stat, index));
+    }
+    return getMockAnalytics();
+  }, [isAuthenticated, stats]);
+
+  // Split into today's race (last 2 days) and historical (rest)
+  const dailyData = allData.slice(0, 7);
+  const historicalData = allData.slice(2);
+
+  const handleSync = async () => {
+    await triggerSync(30);
+  };
+
+  // Refetch stats when sync completes
+  useEffect(() => {
+    if (syncStatus === 'complete') {
+      // Wait a moment for backend to finish processing
+      setTimeout(() => {
+        refetch();
+      }, 2000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncStatus]);
 
   return (
     <div className={"flex flex-col min-h-screen bg-background"}>
@@ -113,6 +65,15 @@ export default function Home() {
                 <span className="text-sm">
                   Welcome, <strong>{user.username}</strong>
                 </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSync}
+                  disabled={syncStatus === 'syncing' || syncStatus === 'calculating'}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${syncStatus === 'syncing' || syncStatus === 'calculating' ? 'animate-spin' : ''}`} />
+                  {syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'calculating' ? 'Calculating...' : 'Sync Gmail'}
+                </Button>
                 <Button variant="outline" size="sm" onClick={logout}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
@@ -129,11 +90,27 @@ export default function Home() {
       </header>
       
       <main className={"flex-1 container mx-auto p-4 md:p-8 space-y-12"}>
+        {syncError && (
+          <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded">
+            <strong>Sync Error:</strong> {syncError}
+          </div>
+        )}
+
+        {!isAuthenticated && (
+          <div className="bg-muted/50 border border-border px-4 py-3 rounded text-center">
+            <p className="text-sm text-muted-foreground">
+              You're viewing demo data. <button onClick={login} className="underline font-medium">Login with Google</button> to see your real email analytics!
+            </p>
+          </div>
+        )}
+
         <section>
           <Card className={"overflow-hidden"}>
             <CardHeader>
               <CardTitle className="font-headline text-3xl tracking-tighter">Today's Snail Race</CardTitle>
-              <CardDescription>A visual comparison of your inbox activity over the last few days.</CardDescription>
+              <CardDescription>
+                {isAuthenticated ? 'Your inbox activity over the last few days.' : 'A visual comparison of your inbox activity (demo data).'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative space-y-4 pr-12 md:pr-24">

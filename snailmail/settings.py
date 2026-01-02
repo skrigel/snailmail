@@ -93,6 +93,24 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_SSL_REDIRECT = False        # ensure off in dev
 
 ACCOUNT_LOGOUT_ON_GET = True
+
+# Social account providers configuration
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+            'https://www.googleapis.com/auth/gmail.readonly',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+            'prompt': 'consent',
+        }
+    }
+}
+
+# Store OAuth tokens so we can use them for API calls
+SOCIALACCOUNT_STORE_TOKENS = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 
