@@ -1,7 +1,7 @@
 "use client";
 
 import type { DailyAnalytics } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/utils';
 
 type SnailProps = {
   analytics: DailyAnalytics;
